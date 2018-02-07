@@ -1,5 +1,4 @@
 
-
 // extract modules
 var fs = require('fs');  // file system module
 var express = require('express');  // express module
@@ -43,38 +42,30 @@ app.get('/',function(request,response) {
 // perform the routing service
 // page cover list 1
 app.get('/list1', function(request,response) {
-    // read the file
-    fs.readFile('list1.html','utf8', function(error,data) {
         // connect the database query
         client.query('SELECT * FROM address', function(error,results) {
             if(error){
                 console.log("list1 get error");
                 throw error;
             } else {
-                response.send(ejs.render(data, {
-                    data: results
-                }));
+                response.send(JSON.stringify(results));
+                console.log(JSON.stringify(results));
                 console.log("list1 get success");
             }});
-    });
 });
 
 // page cover list 2
 app.get('/list2', function(request,response) {
-    // read the file
-    fs.readFile('list2.html','utf8', function(error,data) {
-        // connect the database query
-        client.query('SELECT * FROM privacy', function(error,results) {
-            if(error){
-                console.log("list2 get error");
-                throw error;
-            } else {
-                response.send(ejs.render(data, {
-                    data: results
-                }));
-                console.log("list2 get success");
-            }});
-    });
+    // connect the database query
+    client.query('SELECT * FROM privacy', function(error,results) {
+        if(error){
+            console.log("list2 get error");
+            throw error;
+        } else {
+            response.send(JSON.stringify(results));
+            console.log(JSON.stringify(results));
+            console.log("list2 get success");
+        }});
 });
 
 // '/insert1' , data inserting
@@ -94,10 +85,24 @@ app.post('/insert1',function(request,response) {
     // connect the database query
     client.query('INSERT INTO address (rank,name,addre,phon) VALUES (?,?,?,?)', [
         body.rank, body.name, body.addre, body.phon
-    ], function() {
-        response.redirect('/list1');
-        console.log("insert1 post success");
-    });
+    ], function(error,results) {
+        if(error){
+            console.log("query address error");
+            throw error;
+        } else {
+            console.log("query address success");
+        }});
+
+    // show the result by json format
+    client.query('SELECT * FROM address', function(error,results) {
+        if(error){
+            console.log("insert1 error");
+            throw error;
+        } else {
+            response.send(JSON.stringify(results));
+            console.log(JSON.stringify(results));
+            console.log("insert1 success");
+        }});
 });
 
 // '/insert2' , data inserting
@@ -117,23 +122,37 @@ app.post('/insert2',function(request,response) {
     // connect the database query
     client.query('INSERT INTO privacy (rank,name,age,number) VALUES (?,?,?,?)', [
         body.rank, body.name, body.age, body.number
-    ], function() {
-        response.redirect('/list2');
-        console.log("insert2 post success");
-    });
+    ], function(error,results) {
+        if(error){
+            console.log("query address error");
+            throw error;
+        } else {
+            console.log("query address success");
+        }});
+
+    // show the result by json format
+    client.query('SELECT * FROM privacy', function(error,results) {
+        if(error){
+            console.log("insert2 error");
+            throw error;
+        } else {
+            response.send(JSON.stringify(results));
+            console.log(JSON.stringify(results));
+            console.log("insert2 success");
+        }});
 });
 
 // '/delete' , data deleting
 app.get('/delete1/:id',function(request,response) {
-    client.query('DELETE FROM address WHERE id?', [request.params.id], function() {
-        response.redirect('/list1');
+    client.query('DELETE FROM address WHERE id?', [request.params.id], function(error,results) {
+        response.send(JSON.stringify(results));
         console.log("delete1 success");
     });
 });
 
 app.get('/delete2/:id',function(request,response) {
-    client.query('DELETE FROM privacy WHERE id?', [request.params.id], function() {
-        response.redirect('/list2');
+    client.query('DELETE FROM privacy WHERE id', [request.params.id], function(error,results) {
+        response.send(JSON.stringify(results));
         console.log("delete2 success");
     });
 });
